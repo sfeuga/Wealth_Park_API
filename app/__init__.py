@@ -55,4 +55,46 @@ def create_app(config_name):
 
             return response
 
+    @app.route('/bucketlists/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+    def bucketlist_manipulation(id, **kwargs):
+        # Get buckelist by ID
+        bucketlist = Bucketlist.query.filter_by(id=id).first()
+
+        if not bucketlist:
+            abort(404)
+
+        if request.method == 'DELETE':
+            bucketlist.delete()
+
+            return {
+            "message": "bucketlist {} deleted successfully".format(bucketlist.id) 
+         }, 200
+
+        elif request.method == 'PUT':
+            name = str(request.data.get('name', ''))
+            bucketlist.name = name
+            bucketlist.save()
+
+            response = jsonify({
+                'id': bucketlist.id,
+                'name': bucketlist.name,
+                'date_created': bucketlist.date_created,
+                'date_modified': bucketlist.date_modified
+            })
+            response.status_code = 200
+
+            return response
+
+        else:
+            # GET
+            response = jsonify({
+                'id': bucketlist.id,
+                'name': bucketlist.name,
+                'date_created': bucketlist.date_created,
+                'date_modified': bucketlist.date_modified
+            })
+            response.status_code = 200
+
+            return response
+
     return app
